@@ -20,4 +20,12 @@ public abstract class Gameobject {
     public abstract void draw(Canvas canvas);
 
     public abstract void update();
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 }

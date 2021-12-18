@@ -9,8 +9,8 @@ public class Bullet extends Circle {
     public static final double SPEED_PIXELS_PER_SECOND = 800.0;
     private static final double MAX_SPEED = SPEED_PIXELS_PER_SECOND / GameLoop.MAX_UPS;
 
-    public Bullet(Context context) {
-        super(context, Color.WHITE, 200, 200, 25);
+    public Bullet(Context context, Player player) {
+        super(context, Color.WHITE, player.getX(), player.getY(), 25);
     }
 
     @Override

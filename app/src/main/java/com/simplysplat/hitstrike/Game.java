@@ -27,10 +27,12 @@ import java.util.List;
  */
 public class Game extends SurfaceView implements SurfaceHolder.Callback {
 
+    private Joystick joystick2;
     private GameLoop gameLoop;
     private Player player;
-    private Joystick joystick;
-    private int joystickPointerId = 0;
+    private Joystick joystick1;
+    private int joystick1PointerId = 0;
+    private int joystick2PointerId = 0;
     private List<Bullet> bulletList = new ArrayList<Bullet>();
     private int numberOfBulletsToSpawn = 0;
 
@@ -47,8 +49,10 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         Point size = new Point();
         display.getSize(size);
 
-        joystick = new Joystick(size.x - 300, size.y - 200, 80, 40);
-        player = new Player(context, joystick, 200, 200, 50);
+        joystick1 = new Joystick(size.x - 300, size.y - 200, 80, 40);
+        joystick2 = new Joystick(300, size.y - 200, 80, 40);
+
+        player = new Player(context, joystick1, 200, 200, 50);
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -58,28 +62,49 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-                if (joystick.getIsPressed()) {
-                    numberOfBulletsToSpawn++;
-                }
-                else if (joystick.isPressed((double) event.getX(), (double) event.getY())) {
-                    joystickPointerId = event.getPointerId(event.getActionIndex());
-                    joystick.setIsPressed(true);
-                }
-                else {
-                    numberOfBulletsToSpawn++;
+                if (event.getPointerCount() > 1) {
+                    if (joystick1.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                        joystick1PointerId = event.getPointerId(event.getActionIndex());
+                        joystick1.setIsPressed(true);
+                    }
+                    if (joystick2.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                        joystick2PointerId = event.getPointerId(event.getActionIndex());
+                        joystick2.setIsPressed(true);
+                    }
+                } else {
+                    if (joystick1.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                        joystick1PointerId = event.getPointerId(event.getActionIndex());
+                        joystick1.setIsPressed(true);
+                    }
+                    else if (joystick2.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                        joystick2PointerId = event.getPointerId(event.getActionIndex());
+                        joystick2.setIsPressed(true);
+                    }
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
-                if (joystick.getIsPressed()) {
-                    joystick.setActuator((double) event.getX(), (double) event.getY());
+                if (event.getPointerCount() > 1) {
+                    if (joystick1.getIsPressed())
+                        joystick1.setActuator((double) event.getX(joystick1PointerId), (double) event.getY(joystick1PointerId));
+                    if (joystick2.getIsPressed())
+                        joystick2.setActuator((double) event.getX(joystick2PointerId), (double) event.getY(joystick2PointerId));
+                } else {
+                    if (joystick1.getIsPressed())
+                        joystick1.setActuator((double) event.getX(joystick1PointerId), (double) event.getY(joystick1PointerId));
+                    else if (joystick2.getIsPressed())
+                        joystick2.setActuator((double) event.getX(joystick2PointerId), (double) event.getY(joystick2PointerId));
                 }
                 return true;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
-                if (joystickPointerId == event.getPointerId(event.getActionIndex())) {
-                    joystick.setIsPressed(false);
-                    joystick.resetActuator();
-                }
+                    if (joystick1PointerId == event.getPointerId(event.getActionIndex())) {
+                        joystick1.setIsPressed(false);
+                        joystick1.resetActuator();
+                    }
+                    if (joystick2PointerId == event.getPointerId(event.getActionIndex())) {
+                        joystick2.setIsPressed(false);
+                        joystick2.resetActuator();
+                    }
                 return true;
         }
 
@@ -105,7 +130,8 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        joystick.draw(canvas);
+        joystick1.draw(canvas);
+        joystick2.draw(canvas);
         player.draw(canvas);
 
         for (Bullet bullet : bulletList) {
@@ -114,13 +140,17 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void update() {
-        joystick.update();
+        joystick1.update();
+        joystick2.update();
         player.update();
 
-        while (numberOfBulletsToSpawn > 0) {
-            bulletList.add(new Bullet(getContext()));
-            numberOfBulletsToSpawn--;
+        if (joystick2.getIsPressed())
+            numberOfBulletsToSpawn++;
+
+        if (numberOfBulletsToSpawn != 0 && numberOfBulletsToSpawn % 10 == 0) {
+            bulletList.add(new Bullet(getContext(), player));
         }
+
         for (Bullet bullet : bulletList) {
             bullet.update();
         }
