@@ -11,11 +11,13 @@ public class Bullet extends Circle {
 
     public Bullet(Context context, Player player) {
         super(context, Color.WHITE, player.getX(), player.getY(), 25);
+        velX = player.getDirX() * MAX_SPEED;
+        velY = player.getDirY() * MAX_SPEED;
     }
 
     @Override
     public void update() {
-        x += 5;
-        y += 5;
+        x += velX;
+        y += velY;
     }
 }

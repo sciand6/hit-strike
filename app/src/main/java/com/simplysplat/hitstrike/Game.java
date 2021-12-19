@@ -52,7 +52,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick1 = new Joystick(size.x - 300, size.y - 200, 80, 40);
         joystick2 = new Joystick(300, size.y - 200, 80, 40);
 
-        player = new Player(context, joystick1, 200, 200, 50);
+        player = new Player(context, joystick1, joystick2, 200, 200, 50);
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -62,49 +62,35 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-                if (event.getPointerCount() > 1) {
-                    if (joystick1.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
-                        joystick1PointerId = event.getPointerId(event.getActionIndex());
-                        joystick1.setIsPressed(true);
-                    }
-                    if (joystick2.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
-                        joystick2PointerId = event.getPointerId(event.getActionIndex());
-                        joystick2.setIsPressed(true);
-                    }
-                } else {
-                    if (joystick1.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
-                        joystick1PointerId = event.getPointerId(event.getActionIndex());
-                        joystick1.setIsPressed(true);
-                    }
-                    else if (joystick2.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
-                        joystick2PointerId = event.getPointerId(event.getActionIndex());
-                        joystick2.setIsPressed(true);
-                    }
+                if (joystick1.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                    joystick1PointerId = event.getPointerId(event.getActionIndex());
+                    joystick1.setIsPressed(true);
+                }
+                else if (joystick2.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                    joystick2PointerId = event.getPointerId(event.getActionIndex());
+                    joystick2.setIsPressed(true);
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
-                if (event.getPointerCount() > 1) {
-                    if (joystick1.getIsPressed())
-                        joystick1.setActuator((double) event.getX(joystick1PointerId), (double) event.getY(joystick1PointerId));
-                    if (joystick2.getIsPressed())
-                        joystick2.setActuator((double) event.getX(joystick2PointerId), (double) event.getY(joystick2PointerId));
-                } else {
-                    if (joystick1.getIsPressed())
-                        joystick1.setActuator((double) event.getX(joystick1PointerId), (double) event.getY(joystick1PointerId));
-                    else if (joystick2.getIsPressed())
-                        joystick2.setActuator((double) event.getX(joystick2PointerId), (double) event.getY(joystick2PointerId));
+                if (joystick1.getIsPressed() && joystick2.getIsPressed()) {
+                    joystick1.setActuator((double) event.getX(joystick1PointerId), (double) event.getY(joystick1PointerId));
+                    joystick2.setActuator((double) event.getX(joystick2PointerId), (double) event.getY(joystick2PointerId));
+                } else if (joystick1.getIsPressed()) {
+                    joystick1.setActuator((double) event.getX(), (double) event.getY());
+                } else if (joystick2.getIsPressed()) {
+                    joystick2.setActuator((double) event.getX(), (double) event.getY());
                 }
                 return true;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
-                    if (joystick1PointerId == event.getPointerId(event.getActionIndex())) {
-                        joystick1.setIsPressed(false);
-                        joystick1.resetActuator();
-                    }
-                    if (joystick2PointerId == event.getPointerId(event.getActionIndex())) {
-                        joystick2.setIsPressed(false);
-                        joystick2.resetActuator();
-                    }
+                if (joystick1PointerId == event.getPointerId(event.getActionIndex())) {
+                    joystick1.setIsPressed(false);
+                    joystick1.resetActuator();
+                }
+                if (joystick2PointerId == event.getPointerId(event.getActionIndex())) {
+                    joystick2.setIsPressed(false);
+                    joystick2.resetActuator();
+                }
                 return true;
         }
 
