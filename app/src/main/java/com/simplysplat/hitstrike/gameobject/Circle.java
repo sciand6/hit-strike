@@ -16,6 +16,15 @@ public abstract class Circle extends Gameobject {
          paint.setColor(color);
      }
 
+     public static boolean isColliding(Circle c1, Circle c2) {
+         double distance = getDistanceBetweenObjects(c1, c2);
+         double distanceToCollision = c1.getRadius() + c2.getRadius();
+         if (distance < distanceToCollision)
+             return true;
+         else
+             return false;
+     }
+
      public void draw(Canvas canvas) {
          canvas.drawCircle(
                  (float) x,
@@ -23,5 +32,9 @@ public abstract class Circle extends Gameobject {
                  (float) radius,
                  paint
          );
+     }
+
+     public double getRadius() {
+         return radius;
      }
 }

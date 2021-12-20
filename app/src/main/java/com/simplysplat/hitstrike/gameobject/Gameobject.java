@@ -28,4 +28,11 @@ public abstract class Gameobject {
     public double getY() {
         return y;
     }
+
+    public static double getDistanceBetweenObjects(Gameobject o1, Gameobject o2) {
+        return Math.sqrt(
+                Math.pow(o2.getX() - o1.getX(), 2) +
+                        Math.pow(o2.getY() - o1.getY(), 2)
+        );
+    }
 }

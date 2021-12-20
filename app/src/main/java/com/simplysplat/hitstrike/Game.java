@@ -2,9 +2,7 @@ package com.simplysplat.hitstrike;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Point;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -12,7 +10,6 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 
 import com.simplysplat.hitstrike.gameobject.Bullet;
 import com.simplysplat.hitstrike.gameobject.Player;
@@ -49,10 +46,10 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         Point size = new Point();
         display.getSize(size);
 
-        joystick1 = new Joystick(size.x - 300, size.y - 200, 80, 40);
-        joystick2 = new Joystick(300, size.y - 200, 80, 40);
+        joystick1 = new Joystick(size.x - 150, size.y - 125, 80, 40);
+        joystick2 = new Joystick(150, size.y - 125, 80, 40);
 
-        player = new Player(context, joystick1, joystick2, 200, 200, 50);
+        player = new Player(context, joystick1, joystick2, 200, 200, 25);
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -140,5 +137,9 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         for (Bullet bullet : bulletList) {
             bullet.update();
         }
+    }
+
+    public void pause() {
+        gameLoop.stopLoop();
     }
 }
