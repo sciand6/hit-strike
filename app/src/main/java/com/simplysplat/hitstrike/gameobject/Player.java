@@ -16,8 +16,6 @@ public class Player extends Circle {
     private Joystick joystick2;
     private Joystick joystick1;
     private Context context;
-    private double dirX;
-    private double dirY;
 
     public Player(Context context, Joystick joystick1, Joystick joystick2, double x, double y, double radius) {
         super(context, Color.YELLOW, x, y, radius);
@@ -41,13 +39,5 @@ public class Player extends Circle {
             dirX = velX2 / distance;
             dirY = velY2 / distance;
         }
-    }
-
-    public double getDirY() {
-        return dirY;
-    }
-
-    public double getDirX() {
-        return dirX;
     }
 }

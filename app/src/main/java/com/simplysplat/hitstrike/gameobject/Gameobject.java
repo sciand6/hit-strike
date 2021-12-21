@@ -7,6 +7,8 @@ public abstract class Gameobject {
     protected double y;
     protected double velX;
     protected double velY;
+    protected double dirX;
+    protected double dirY;
 
     public Gameobject() {
 
@@ -27,6 +29,14 @@ public abstract class Gameobject {
 
     public double getY() {
         return y;
+    }
+
+    public double getDirY() {
+        return dirY;
+    }
+
+    public double getDirX() {
+        return dirX;
     }
 
     public static double getDistanceBetweenObjects(Gameobject o1, Gameobject o2) {

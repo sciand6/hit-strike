@@ -2,6 +2,7 @@ package com.simplysplat.hitstrike;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -12,10 +13,13 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.simplysplat.hitstrike.gameobject.Bullet;
+import com.simplysplat.hitstrike.gameobject.Circle;
+import com.simplysplat.hitstrike.gameobject.GenericEnemy;
 import com.simplysplat.hitstrike.gameobject.Player;
 import com.simplysplat.hitstrike.gamepanel.Joystick;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,6 +35,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     private int joystick1PointerId = 0;
     private int joystick2PointerId = 0;
     private List<Bullet> bulletList = new ArrayList<Bullet>();
+    private List<GenericEnemy> enemyList = new ArrayList<GenericEnemy>();
     private int numberOfBulletsToSpawn = 0;
 
     public Game(Context context) {
@@ -50,6 +55,10 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick2 = new Joystick(150, size.y - 125, 80, 40);
 
         player = new Player(context, joystick1, joystick2, 200, 200, 25);
+
+        enemyList.add(new GenericEnemy(context, Color.RED, 300, 200, 30, player));
+        enemyList.add(new GenericEnemy(context, Color.RED, 400, 200, 30, player));
+        enemyList.add(new GenericEnemy(context, Color.RED, 500, 200, 30, player));
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -117,6 +126,10 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick2.draw(canvas);
         player.draw(canvas);
 
+        for (GenericEnemy enemy : enemyList) {
+            enemy.draw(canvas);
+        }
+
         for (Bullet bullet : bulletList) {
             bullet.draw(canvas);
         }
@@ -131,11 +144,40 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
             numberOfBulletsToSpawn++;
 
         if (numberOfBulletsToSpawn != 0 && numberOfBulletsToSpawn % 10 == 0) {
-            bulletList.add(new Bullet(getContext(), player));
+            for (GenericEnemy enemy : enemyList) {
+                bulletList.add(new Bullet(getContext(), enemy, Bullet.ShooterTag.ENEMY));
+            }
+            bulletList.add(new Bullet(getContext(), player, Bullet.ShooterTag.PLAYER));
         }
 
         for (Bullet bullet : bulletList) {
             bullet.update();
+        }
+
+        for (GenericEnemy enemy : enemyList) {
+            enemy.update();
+        }
+
+        Iterator<Bullet> bulletIterator = bulletList.iterator();
+
+        while (bulletIterator.hasNext()) {
+            Bullet bullet = bulletIterator.next();
+
+            if (Circle.isColliding(player, bullet) && bullet.firedBy() == Bullet.ShooterTag.ENEMY) {
+                // TODO: Health logic or game over
+                bulletIterator.remove();
+                break;
+            }
+
+            Iterator<GenericEnemy> enemyIterator = enemyList.iterator();
+            while (enemyIterator.hasNext()) {
+                Circle enemy = enemyIterator.next();
+                if (Circle.isColliding(enemy, bullet) && bullet.firedBy() == Bullet.ShooterTag.PLAYER) {
+                    enemyIterator.remove();
+                    bulletIterator.remove();
+                    break;
+                }
+            }
         }
     }
 
