@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -14,11 +15,13 @@ import androidx.annotation.NonNull;
 
 import com.simplysplat.hitstrike.gameobject.Bullet;
 import com.simplysplat.hitstrike.gameobject.Circle;
-import com.simplysplat.hitstrike.gameobject.GenericEnemy;
+import com.simplysplat.hitstrike.gameobject.Gameobject;
+import com.simplysplat.hitstrike.gameobject.Shooter;
 import com.simplysplat.hitstrike.gameobject.Player;
 import com.simplysplat.hitstrike.gamepanel.Joystick;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,7 +38,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     private int joystick1PointerId = 0;
     private int joystick2PointerId = 0;
     private List<Bullet> bulletList = new ArrayList<Bullet>();
-    private List<GenericEnemy> enemyList = new ArrayList<GenericEnemy>();
+    private List<Shooter> botList = new ArrayList<Shooter>();
     private int numberOfBulletsToSpawn = 0;
 
     public Game(Context context) {
@@ -56,9 +59,19 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
 
         player = new Player(context, joystick1, joystick2, 200, 200, 25);
 
-        enemyList.add(new GenericEnemy(context, Color.RED, 300, 200, 30, player));
-        enemyList.add(new GenericEnemy(context, Color.RED, 400, 200, 30, player));
-        enemyList.add(new GenericEnemy(context, Color.RED, 500, 200, 30, player));
+        // Add enemies and teammates
+        botList.add(new Shooter(context, Color.RED, size.x - 100, 200, 30, player, Gameobject.EntityTag.TEAM2, 0));
+        botList.add(new Shooter(context, Color.GREEN, 100, 200, 30, botList.get(0), Gameobject.EntityTag.TEAM1, 1));
+        botList.add(new Shooter(context, Color.RED, size.x - 100, 400, 30, botList.get(1), Gameobject.EntityTag.TEAM2, 2));
+        botList.add(new Shooter(context, Color.GREEN, 100, 400, 30, botList.get(2), Gameobject.EntityTag.TEAM1, 3));
+        botList.add(new Shooter(context, Color.RED, size.x - 100, 600, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 4));
+        botList.add(new Shooter(context, Color.GREEN, 100, 600, 30, botList.get(4), Gameobject.EntityTag.TEAM1, 5));
+        botList.add(new Shooter(context, Color.RED, size.x - 100, 800, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 6));
+        botList.add(new Shooter(context, Color.RED, size.x - 100, 900, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 7));
+        botList.add(new Shooter(context, Color.RED, size.x - 100, 1100, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 8));
+        botList.add(new Shooter(context, Color.RED, size.x - 200, 1100, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 9));
+        botList.add(new Shooter(context, Color.RED, size.x - 200, 900, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 10));
+        botList.add(new Shooter(context, Color.RED, size.x - 200, 700, 30, botList.get(3), Gameobject.EntityTag.TEAM2, 11));
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -126,7 +139,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick2.draw(canvas);
         player.draw(canvas);
 
-        for (GenericEnemy enemy : enemyList) {
+        for (Shooter enemy : botList) {
             enemy.draw(canvas);
         }
 
@@ -140,22 +153,46 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick2.update();
         player.update();
 
-        if (joystick2.getIsPressed())
-            numberOfBulletsToSpawn++;
+        // MAIN AI LOGIC: Gets the closest target for each bot and adds a bullet to spawn if they are firing
+        for (Shooter bot : botList) {
+            if (bot.getBulletsToSpawn() == 50) {
+                if (bot.getEntity() == Gameobject.EntityTag.TEAM1)
+                    bulletList.add(new Bullet(getContext(), bot, Gameobject.EntityTag.TEAM1));
+                else
+                    bulletList.add(new Bullet(getContext(), bot, Gameobject.EntityTag.TEAM2));
 
-        if (numberOfBulletsToSpawn != 0 && numberOfBulletsToSpawn % 10 == 0) {
-            for (GenericEnemy enemy : enemyList) {
-                bulletList.add(new Bullet(getContext(), enemy, Bullet.ShooterTag.ENEMY));
+                bot.setBulletsToSpawn(0);
             }
-            bulletList.add(new Bullet(getContext(), player, Bullet.ShooterTag.PLAYER));
+
+            for (Shooter bot2 : botList) {
+                // If they are the same or on the same team
+                if (bot.getBotId() == bot2.getBotId() || bot.getEntity() == bot2.getEntity()) {
+                    continue;
+                }
+
+                double distanceToTarget = Gameobject.getDistanceBetweenObjects(bot, bot2);
+                double distanceToPlayer = Gameobject.getDistanceBetweenObjects(bot, player);
+
+                if (bot.getEntity() == Gameobject.EntityTag.TEAM2 && distanceToPlayer < bot.getCurrentTargetDistance() && distanceToPlayer < distanceToTarget) {
+                    bot.setTarget(player);
+                } else if (distanceToTarget < bot.getCurrentTargetDistance()) {
+                    bot.setTarget(bot2);
+                }
+            }
+            bot.update();
+        }
+
+        if (joystick2.getIsPressed()) {
+            numberOfBulletsToSpawn++;
+        }
+
+        if (numberOfBulletsToSpawn == 15) {
+            bulletList.add(new Bullet(getContext(), player, Gameobject.EntityTag.TEAM1));
+            numberOfBulletsToSpawn = 0;
         }
 
         for (Bullet bullet : bulletList) {
             bullet.update();
-        }
-
-        for (GenericEnemy enemy : enemyList) {
-            enemy.update();
         }
 
         Iterator<Bullet> bulletIterator = bulletList.iterator();
@@ -163,17 +200,17 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         while (bulletIterator.hasNext()) {
             Bullet bullet = bulletIterator.next();
 
-            if (Circle.isColliding(player, bullet) && bullet.firedBy() == Bullet.ShooterTag.ENEMY) {
+            if (Circle.isColliding(player, bullet) && bullet.firedBy() == Gameobject.EntityTag.TEAM2) {
                 // TODO: Health logic or game over
                 bulletIterator.remove();
                 break;
             }
 
-            Iterator<GenericEnemy> enemyIterator = enemyList.iterator();
-            while (enemyIterator.hasNext()) {
-                Circle enemy = enemyIterator.next();
-                if (Circle.isColliding(enemy, bullet) && bullet.firedBy() == Bullet.ShooterTag.PLAYER) {
-                    enemyIterator.remove();
+            Iterator<Shooter> botIterator = botList.iterator();
+            while (botIterator.hasNext()) {
+                Circle enemy = botIterator.next();
+                if (Circle.isColliding(enemy, bullet) && bullet.firedBy() != enemy.getEntity()) {
+                    botIterator.remove();
                     bulletIterator.remove();
                     break;
                 }

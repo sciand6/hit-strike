@@ -9,14 +9,22 @@ public abstract class Gameobject {
     protected double velY;
     protected double dirX;
     protected double dirY;
+    protected EntityTag entity;
+
+    public enum EntityTag {
+        TEAM1,
+        TEAM2,
+        BULLET
+    }
 
     public Gameobject() {
 
     }
 
-    public Gameobject(double x, double y) {
+    public Gameobject(double x, double y, EntityTag entity) {
         this.x = x;
         this.y = y;
+        this.entity = entity;
     }
 
     public abstract void draw(Canvas canvas);
@@ -44,5 +52,9 @@ public abstract class Gameobject {
                 Math.pow(o2.getX() - o1.getX(), 2) +
                         Math.pow(o2.getY() - o1.getY(), 2)
         );
+    }
+
+    public EntityTag getEntity() {
+        return entity;
     }
 }

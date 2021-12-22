@@ -18,7 +18,7 @@ public class Player extends Circle {
     private Context context;
 
     public Player(Context context, Joystick joystick1, Joystick joystick2, double x, double y, double radius) {
-        super(context, Color.YELLOW, x, y, radius);
+        super(context, Color.YELLOW, x, y, radius, EntityTag.TEAM1);
         this.context = context;
         this.joystick1 = joystick1;
         this.joystick2 = joystick2;
