@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
+import com.simplysplat.hitstrike.Game;
 import com.simplysplat.hitstrike.GameLoop;
 import com.simplysplat.hitstrike.MathUtils;
 import com.simplysplat.hitstrike.gamepanel.Joystick;
@@ -16,11 +17,9 @@ public class Player extends Circle {
     private Joystick joystick2;
     private Joystick joystick1;
     private Context context;
-    private double dirX;
-    private double dirY;
 
-    public Player(Context context, Joystick joystick1, Joystick joystick2, double x, double y, double radius) {
-        super(context, Color.YELLOW, x, y, radius);
+    public Player(Context context, Joystick joystick1, Joystick joystick2, double x, double y, double radius, boolean isPlayer) {
+        super(context, Color.YELLOW, x, y, radius, isPlayer);
         this.context = context;
         this.joystick1 = joystick1;
         this.joystick2 = joystick2;
@@ -29,6 +28,9 @@ public class Player extends Circle {
     public void update() {
         velX = joystick1.getActuatorX() * MAX_SPEED;
         velY = joystick1.getActuatorY() * MAX_SPEED;
+
+        x = clamp(x, 0, Game.screenSize.x);
+        y = clamp(y, 0, Game.screenSize.y);
 
         x += velX;
         y += velY;
