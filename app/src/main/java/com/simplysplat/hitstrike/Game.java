@@ -60,23 +60,23 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick1 = new Joystick(size.x - 150, size.y - 125, 80, 40);
         joystick2 = new Joystick(150, size.y - 125, 80, 40);
 
-        player = new Player(context, joystick1, joystick2, 200, 200, 25, true);
+        player = new Player(context, joystick1, joystick2, 200, 200, 15, true);
 
         team1.add(player);
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 25, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -210,7 +210,12 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
                     }
                 }
                 // Finally tell the entire game that this entity is dead
-                entity.setIsDead(true);
+                if (entity.getHealth() <= 10) {
+                    entity.setIsDead(true);
+                } else {
+                    // Hardcoding the 10 for now. Will probably store in a variable called damage later.
+                    entity.setHealth(entity.getHealth() - 10);
+                }
             }
         }
 

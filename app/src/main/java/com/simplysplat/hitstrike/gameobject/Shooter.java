@@ -1,6 +1,9 @@
 package com.simplysplat.hitstrike.gameobject;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 
 import com.simplysplat.hitstrike.Game;
@@ -12,6 +15,13 @@ public class Shooter extends Circle {
 
     public Shooter(Context context, int color, double x, double y, double radius, boolean isPlayer) {
         super(context, color, x, y, radius, isPlayer);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        // draw health
+        drawHealthBar(canvas);
     }
 
     @Override
