@@ -13,8 +13,8 @@ import java.util.ArrayList;
 public class Shooter extends Circle {
     private int updates = 74;
 
-    public Shooter(Context context, int color, double x, double y, double radius, boolean isPlayer) {
-        super(context, color, x, y, radius, isPlayer);
+    public Shooter(Context context, int color, double x, double y, boolean isPlayer) {
+        super(context, color, x, y, 20, isPlayer);
     }
 
     @Override

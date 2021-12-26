@@ -3,6 +3,7 @@ package com.simplysplat.hitstrike;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.Display;
@@ -41,6 +42,8 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     private List<Gameobject> team2 = new ArrayList<Gameobject>();
     private int numberOfBulletsToSpawn = 0;
     public static Point screenSize;
+    private int level = 1;
+    private int friendlyCount = 2;
 
     public Game(Context context) {
         super(context);
@@ -60,23 +63,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         joystick1 = new Joystick(size.x - 150, size.y - 125, 80, 40);
         joystick2 = new Joystick(150, size.y - 125, 80, 40);
 
-        player = new Player(context, joystick1, joystick2, 200, 200, 15, true);
-
-        team1.add(player);
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team1.add(new Shooter(context, Color.GREEN, 400, 800, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
-        team2.add(new Shooter(context, Color.RED, 1300, 300, 15, false));
+        startNewLevel();
 
         gameLoop = new GameLoop(this, surfaceHolder);
     }
@@ -139,6 +126,14 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
+
+        // Draw HUD which is just text for now
+        Paint levelTextPaint = new Paint();
+        levelTextPaint.setColor(Color.WHITE);
+        levelTextPaint.setTextSize(60);
+
+        canvas.drawText("Level: " + String.valueOf(level), 100, 100, levelTextPaint);
+
         joystick1.draw(canvas);
         joystick2.draw(canvas);
 
@@ -161,6 +156,13 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void update() {
+        if (determineLoser(team1, team2) == 1) {
+            startNewLevel();
+        } else if (determineLoser(team1, team2) == 2) {
+            level++;
+            startNewLevel();
+        }
+
         joystick1.update();
         joystick2.update();
 
@@ -253,6 +255,54 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
 
         entity.setDirX(distanceToTargetX / distanceToTarget);
         entity.setDirY(distanceToTargetY / distanceToTarget);
+    }
+
+    public int determineLoser(List<Gameobject> team1, List<Gameobject> team2) {
+        int team1DeathCount = 0;
+        int team2DeathCount = 0;
+
+        for (Gameobject friendly : team1) {
+            if (friendly.getIsDead())
+                team1DeathCount++;
+        }
+
+        for (Gameobject enemy : team2) {
+            if (enemy.getIsDead())
+                team2DeathCount++;
+        }
+        // If team 1 loses return 1
+        if (team1DeathCount == team1.size()) {
+            return 1;
+        }
+        // If team 2 loses return 2
+        else if (team2DeathCount == team2.size()) {
+            return 2;
+        }
+
+        // Default return -1
+        return -1;
+    }
+
+    public void startNewLevel() {
+        if (level % 3 == 0)
+            friendlyCount++;
+
+        team1.clear();
+        team2.clear();
+
+        player = new Player(getContext(), joystick1, joystick2, 300, screenSize.y / 2, true);
+
+        team1.add(player);
+
+        // Spawn friendlies
+        for (int i = 0; i < friendlyCount; i++) {
+            team1.add(new Shooter(getContext(), Color.GREEN, 300, screenSize.y / 2, false));
+        }
+
+        // Spawn enemies
+        for (int i = 0; i < level; i++) {
+            team2.add(new Shooter(getContext(), Color.RED, screenSize.x - 300, screenSize.y / 2, false));
+        }
     }
 
     public void pause() {
