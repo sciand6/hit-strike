@@ -40,10 +40,12 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     private List<Bullet> bulletList = new ArrayList<Bullet>();
     private List<Gameobject> team1 = new ArrayList<Gameobject>();
     private List<Gameobject> team2 = new ArrayList<Gameobject>();
-    private int numberOfBulletsToSpawn = 0;
+    private int numberOfBulletsToSpawn = 1;
     public static Point screenSize;
     private int level = 1;
     private int friendlyCount = 2;
+    private int team1DeathCount = 0;
+    private int team2DeathCount = 0;
 
     public Game(Context context) {
         super(context);
@@ -156,9 +158,9 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void update() {
-        if (determineLoser(team1, team2) == 1) {
+        if (determineLoser() == 1) {
             startNewLevel();
-        } else if (determineLoser(team1, team2) == 2) {
+        } else if (determineLoser() == 2) {
             level++;
             startNewLevel();
         }
@@ -172,104 +174,63 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         if (joystick2.getIsPressed() && !player.getIsDead())
             numberOfBulletsToSpawn++;
 
-        if (numberOfBulletsToSpawn != 0 && numberOfBulletsToSpawn == 10) {
-            bulletList.add(new Bullet(getContext(), player, "Team1", false));
+        if (numberOfBulletsToSpawn == 10) {
+            bulletList.add(new Bullet(getContext(), player, "Team1", this));
             numberOfBulletsToSpawn = 0;
         }
 
-        for (Bullet bullet : bulletList) {
-            bullet.update();
+        Iterator<Bullet> bulletIterator = bulletList.iterator();
+        while (bulletIterator.hasNext()) {
+            Bullet bullet = bulletIterator.next();
+
+            if (bullet.getX() > screenSize.x || bullet.getY() > screenSize.y || bullet.getCollided()) {
+                bulletIterator.remove();
+            }
+            else {
+                bullet.update();
+            }
         }
 
         for (Gameobject friendly : team1) {
-            controlAI(friendly, "Team1", "Team2", team2, bulletList);
-
             if (!friendly.getIsDead())
                 friendly.update();
         }
 
         for (Gameobject enemy : team2) {
-            controlAI(enemy, "Team2", "Team1", team1, bulletList);
-
             if (!enemy.getIsDead())
                 enemy.update();
         }
     }
 
-    public void controlAI(Gameobject entity, String friendlyTeamName, String enemyTeamName, List<Gameobject> enemyList, List<Bullet> bulletList) {
-        // Check if this entity was hit
-        Iterator<Bullet> bulletIterator = bulletList.iterator();
-
-        while (bulletIterator.hasNext()) {
-            Bullet bullet = bulletIterator.next();
-            if (Circle.isColliding((Circle) entity, bullet) && bullet.getIsFiredBy() == enemyTeamName && !entity.getIsDead()) {
-                // Remove the bullet before anything
-                bulletIterator.remove();
-                // Tell whoever is targeting this entity on the opposing team that it's dead
-                for (Gameobject enemy : enemyList) {
-                    if (enemy.getTarget() == entity) {
-                        enemy.setHasTarget(false);
-                    }
-                }
-                // Finally tell the entire game that this entity is dead
-                if (entity.getHealth() <= 10) {
-                    entity.setIsDead(true);
-                } else {
-                    // Hardcoding the 10 for now. Will probably store in a variable called damage later.
-                    entity.setHealth(entity.getHealth() - 10);
-                }
-            }
-        }
-
-        // If the entity has a live target, then update their direction towards the target and either fire a bullet or increase the updates until their next bullet
-        if (entity.getHasTarget() && !entity.getTarget().getIsDead()) {
-            // Update the entity to point to their target
-            updateEntityDirection(entity);
-            // Should probably make this hardcoded 50 a variable, but it's ok for now
-            // Either way if they meet the updates until fire criteria, and they aren't dead or the player
-            // then fire a bullet
-            if (entity.getFireRate() == 50 && !entity.getIsDead() && !entity.getIsPlayer()) {
-                bulletList.add(new Bullet(getContext(), entity, friendlyTeamName, false));
-                entity.setFireRate(0);// Reset updates until next bullet
-            }
-            else {
-                entity.setFireRate(entity.getFireRate() + 1);
-            }
-        }
-        else {
-            // Just pick any target that isn't dead (will probably change this logic sooner or later)
-            for (Gameobject enemy : enemyList) {
-                if (!enemy.getIsDead()) {
-                    entity.setHasTarget(true);
-                    entity.setTarget(enemy);
-                }
-            }
-        }
+    public void addBullet(Gameobject entity, String teamName) {
+        bulletList.add(new Bullet(getContext(), entity, teamName, this));
     }
 
-    public void updateEntityDirection(Gameobject entity) {
-        double distanceToTargetX = entity.getTarget().getX() - entity.getX();
-        double distanceToTargetY = entity.getTarget().getY() - entity.getY();
-
-        double distanceToTarget = Gameobject.getDistanceBetweenObjects(entity, entity.getTarget());
-
-        entity.setDirX(distanceToTargetX / distanceToTarget);
-        entity.setDirY(distanceToTargetY / distanceToTarget);
+    public List<Gameobject> getTeam1() {
+        return team1;
     }
 
-    public int determineLoser(List<Gameobject> team1, List<Gameobject> team2) {
-        int team1DeathCount = 0;
-        int team2DeathCount = 0;
+    public List<Gameobject> getTeam2() {
+        return team2;
+    }
 
-        for (Gameobject friendly : team1) {
-            if (friendly.getIsDead())
-                team1DeathCount++;
-        }
+    public int getTeam1DeathCount() {
+        return team1DeathCount;
+    }
 
-        for (Gameobject enemy : team2) {
-            if (enemy.getIsDead())
-                team2DeathCount++;
-        }
+    public void setTeam1DeathCount(int team1DeathCount) {
+        this.team1DeathCount = team1DeathCount;
+    }
+
+    public int getTeam2DeathCount() {
+        return team2DeathCount;
+    }
+
+    public void setTeam2DeathCount(int team2DeathCount) {
+        this.team2DeathCount = team2DeathCount;
+    }
+
+    public int determineLoser() {
         // If team 1 loses return 1
         if (team1DeathCount == team1.size()) {
             return 1;
@@ -284,24 +245,26 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void startNewLevel() {
-        if (level % 3 == 0)
+        if (level % 2 == 0)
             friendlyCount++;
 
         team1.clear();
         team2.clear();
+        team1DeathCount = 0;
+        team2DeathCount = 0;
 
-        player = new Player(getContext(), joystick1, joystick2, 300, screenSize.y / 2, true);
+        player = new Player(getContext(), joystick1, joystick2, 300, screenSize.y / 2);
 
         team1.add(player);
 
         // Spawn friendlies
         for (int i = 0; i < friendlyCount; i++) {
-            team1.add(new Shooter(getContext(), Color.GREEN, 300, screenSize.y / 2, false));
+            team1.add(new Shooter(getContext(), Color.GREEN, 300, screenSize.y / 2, "Team1", this));
         }
 
         // Spawn enemies
         for (int i = 0; i < level; i++) {
-            team2.add(new Shooter(getContext(), Color.RED, screenSize.x - 300, screenSize.y / 2, false));
+            team2.add(new Shooter(getContext(), Color.RED, screenSize.x - 300, screenSize.y / 2, "Team2", this));
         }
     }
 

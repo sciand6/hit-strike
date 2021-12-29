@@ -24,12 +24,14 @@ public abstract class Gameobject {
     protected boolean isPlayer;
     protected float health = maxHealth;
     protected Context context;
+    protected String teamName;
 
-    public Gameobject(Context context, double x, double y, boolean isPlayer) {
+    public Gameobject(Context context, double x, double y, boolean isPlayer, String teamName) {
         this.context = context;
         this.isPlayer = isPlayer;
         this.x = x;
         this.y = y;
+        this.teamName = teamName;
     }
 
     public abstract void draw(Canvas canvas);

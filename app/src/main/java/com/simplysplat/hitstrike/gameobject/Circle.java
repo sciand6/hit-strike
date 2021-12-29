@@ -8,8 +8,8 @@ public abstract class Circle extends Gameobject {
      protected double radius;
      protected Paint paint;
 
-     public Circle(Context context, int color, double x, double y, double radius, boolean isPlayer) {
-         super(context, x, y, isPlayer);
+     public Circle(Context context, int color, double x, double y, double radius, boolean isPlayer, String teamName) {
+         super(context, x, y, isPlayer, teamName);
          this.radius = radius;
 
          paint = new Paint();

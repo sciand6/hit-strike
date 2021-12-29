@@ -10,9 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HitStrike">
         <activity
-            android:screenOrientation="landscape"
+            android:name=".GameActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
