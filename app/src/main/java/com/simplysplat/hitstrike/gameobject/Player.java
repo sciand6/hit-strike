@@ -12,14 +12,13 @@ import com.simplysplat.hitstrike.MathUtils;
 import com.simplysplat.hitstrike.gamepanel.Joystick;
 
 public class Player extends Circle {
-    public static final double SPEED_PIXELS_PER_SECOND = 100.0;
+    public static final double SPEED_PIXELS_PER_SECOND = 200.0;
     private static final double MAX_SPEED = SPEED_PIXELS_PER_SECOND / GameLoop.MAX_UPS;
     private Joystick joystick2;
     private Joystick joystick1;
-    private Context context;
 
-    public Player(Context context, Joystick joystick1, Joystick joystick2, double x, double y, boolean isPlayer) {
-        super(context, Color.YELLOW, x, y, 20, isPlayer);
+    public Player(Context context, Joystick joystick1, Joystick joystick2, double x, double y) {
+        super(context, Color.YELLOW, x, y, 25, "Team1");
         this.context = context;
         this.joystick1 = joystick1;
         this.joystick2 = joystick2;

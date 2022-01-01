@@ -4,12 +4,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-public abstract class Circle extends Gameobject {
+public abstract class Circle extends AI {
      protected double radius;
      protected Paint paint;
 
-     public Circle(Context context, int color, double x, double y, double radius, boolean isPlayer) {
-         super(context, x, y, isPlayer);
+     public Circle(Context context, int color, double x, double y, double radius, String teamName) {
+         super(context, x, y, teamName);
          this.radius = radius;
 
          paint = new Paint();
