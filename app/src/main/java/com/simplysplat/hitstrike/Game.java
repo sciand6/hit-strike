@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import com.simplysplat.hitstrike.gameobject.Bullet;
 import com.simplysplat.hitstrike.gameobject.Circle;
 import com.simplysplat.hitstrike.gameobject.Gameobject;
+import com.simplysplat.hitstrike.gameobject.MovingObject;
 import com.simplysplat.hitstrike.gameobject.Player;
 import com.simplysplat.hitstrike.gameobject.Shooter;
 import com.simplysplat.hitstrike.gamepanel.Joystick;
@@ -37,9 +38,9 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     private Joystick joystick1;
     private int joystick1PointerId = 0;
     private int joystick2PointerId = 0;
-    private List<Bullet> bulletList = new ArrayList<Bullet>();
-    private List<Gameobject> team1 = new ArrayList<Gameobject>();
-    private List<Gameobject> team2 = new ArrayList<Gameobject>();
+    private List<Bullet> bulletList = new ArrayList<>();
+    private List<Gameobject> team1 = new ArrayList<>();
+    private List<Gameobject> team2 = new ArrayList<>();
     private int numberOfBulletsToSpawn = 1;
     public static Point screenSize;
     private int level = 1;
@@ -75,23 +76,23 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
-                if (joystick1.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                if (joystick1.isPressed(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
                     joystick1PointerId = event.getPointerId(event.getActionIndex());
                     joystick1.setIsPressed(true);
                 }
-                else if (joystick2.isPressed((double) event.getX(event.getActionIndex()), (double) event.getY(event.getActionIndex()))) {
+                else if (joystick2.isPressed(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()))) {
                     joystick2PointerId = event.getPointerId(event.getActionIndex());
                     joystick2.setIsPressed(true);
                 }
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if (joystick1.getIsPressed() && joystick2.getIsPressed()) {
-                    joystick1.setActuator((double) event.getX(joystick1PointerId), (double) event.getY(joystick1PointerId));
-                    joystick2.setActuator((double) event.getX(joystick2PointerId), (double) event.getY(joystick2PointerId));
+                    joystick1.setActuator(event.getX(joystick1PointerId), event.getY(joystick1PointerId));
+                    joystick2.setActuator(event.getX(joystick2PointerId), event.getY(joystick2PointerId));
                 } else if (joystick1.getIsPressed()) {
-                    joystick1.setActuator((double) event.getX(), (double) event.getY());
+                    joystick1.setActuator(event.getX(), event.getY());
                 } else if (joystick2.getIsPressed()) {
-                    joystick2.setActuator((double) event.getX(), (double) event.getY());
+                    joystick2.setActuator(event.getX(), event.getY());
                 }
                 return true;
             case MotionEvent.ACTION_UP:
@@ -134,7 +135,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         levelTextPaint.setColor(Color.WHITE);
         levelTextPaint.setTextSize(60);
 
-        canvas.drawText("Level: " + String.valueOf(level), 100, 100, levelTextPaint);
+        canvas.drawText("Level: " + level, 100, 100, levelTextPaint);
 
         joystick1.draw(canvas);
         joystick2.draw(canvas);
@@ -183,7 +184,9 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         while (bulletIterator.hasNext()) {
             Bullet bullet = bulletIterator.next();
 
-            if (bullet.getX() > screenSize.x || bullet.getY() > screenSize.y || bullet.getCollided()) {
+            if (bullet.getX() > screenSize.x || bullet.getY() > screenSize.y
+                    || bullet.getX() < 0 || bullet.getY() < 0
+                    || bullet.getCollided()) {
                 bulletIterator.remove();
             }
             else {
@@ -202,7 +205,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    public void addBullet(Gameobject entity, String teamName) {
+    public void addBullet(MovingObject entity, String teamName) {
         bulletList.add(new Bullet(getContext(), entity, teamName, this));
     }
 

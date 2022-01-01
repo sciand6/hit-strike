@@ -15,8 +15,8 @@ public class Bullet extends Circle {
     private Game game;
     private boolean collided = false;
 
-    public Bullet(Context context, Gameobject player, String firedBy, Game game) {
-        super(context, firedBy == "Team1" ? Color.GREEN : Color.RED, player.getX(), player.getY(), 8, false, "");
+    public Bullet(Context context, MovingObject player, String firedBy, Game game) {
+        super(context, firedBy == "Team1" ? Color.GREEN : Color.RED, player.getX(), player.getY(), 8, "");
         this.firedBy = firedBy;
         this.game = game;
         velX = player.getDirX() * MAX_SPEED;
@@ -45,7 +45,7 @@ public class Bullet extends Circle {
 
     public void checkForHit(List<Gameobject> team) {
         for (Gameobject entity : team) {
-            if (Circle.isColliding((Circle) entity, this) && !entity.isDead) {
+            if (Circle.isColliding((Circle) entity, this) && !entity.getIsDead()) {
                 collided = true;
                 doDamageOrKill(entity);
             }

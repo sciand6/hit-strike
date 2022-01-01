@@ -15,7 +15,7 @@ public class Shooter extends Circle {
     private Game game;
 
     public Shooter(Context context, int color, double x, double y, String teamName, Game game) {
-        super(context, color, x, y, 25, false, teamName);
+        super(context, color, x, y, 25, teamName);
         this.game = game;
     }
 
@@ -30,46 +30,15 @@ public class Shooter extends Circle {
     public void update() {
         updatesUntilDirectionChange++;
         if (hasTarget) {
-            if (target.isDead)
+            if (target.getIsDead())
                 hasTarget = false;
             else {
-                // Update direction
-                double distanceToTargetX = target.x - x;
-                double distanceToTargetY = target.y - y;
-
-                double distanceToTarget = getDistanceBetweenObjects(this, target);
-
-                dirX = distanceToTargetX / distanceToTarget;
-                dirY = distanceToTargetY / distanceToTarget;
-
-                // Shoot bullet
-                if (fireRate == 50) {
-                    game.addBullet(this, teamName);
-                    fireRate = 0;
-                } else {
-                    fireRate++;
-                }
+                updateDirection();
+                shoot();
             }
         }
         else {
-            // Look for new target
-            if (teamName == "Team1") {
-                // Look in team2 list
-                for (Gameobject enemy : game.getTeam2()) {
-                    if (!enemy.isDead) {
-                        hasTarget = true;
-                        target = enemy;
-                    }
-                }
-            }
-            else {
-                for (Gameobject enemy : game.getTeam1()) {
-                    if (!enemy.isDead) {
-                        hasTarget = true;
-                        target = enemy;
-                    }
-                }
-            }
+            lookForNewTarget();
         }
 
         if (updatesUntilDirectionChange >= 75) {
@@ -83,5 +52,46 @@ public class Shooter extends Circle {
 
         x += velX;
         y += velY;
+    }
+
+    public void updateDirection() {
+        // Update direction
+        double distanceToTargetX = target.getX() - x;
+        double distanceToTargetY = target.getY() - y;
+
+        double distanceToTarget = getDistanceBetweenObjects(this, target);
+
+        dirX = distanceToTargetX / distanceToTarget;
+        dirY = distanceToTargetY / distanceToTarget;
+    }
+
+    public void shoot() {
+        if (fireRate == 50) {
+            game.addBullet(this, teamName);
+            fireRate = 0;
+        } else {
+            fireRate++;
+        }
+    }
+
+    public void lookForNewTarget() {
+        // Look for new target
+        if (teamName.equals("Team1")) {
+            // Look in team2 list
+            for (Gameobject enemy : game.getTeam2()) {
+                if (!enemy.getIsDead()) {
+                    hasTarget = true;
+                    target = enemy;
+                }
+            }
+        }
+        else {
+            for (Gameobject enemy : game.getTeam1()) {
+                if (!enemy.getIsDead()) {
+                    hasTarget = true;
+                    target = enemy;
+                }
+            }
+        }
     }
 }
